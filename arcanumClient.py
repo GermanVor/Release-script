@@ -2,13 +2,25 @@ import requests
 from ordered_set import OrderedSet
 import asyncio
 import datasphereClient
-
+import os
+import dotenv
 
 def getToken():
-    print("I need your OAuth-Token for Arcanum")
-    print("Take it please from https://a.yandex-team.ru/oauth/token (field access_token)")
-    print("and paste. (If link does not work please check docs https://docs.yandex-team.ru/arcanum/communication/public-api)")
-    return input('Token: ')
+    dotenv.load_dotenv()
+
+    token = os.environ.get("ARCANUM_TOKEN")
+
+    if token == None:
+        print("I need your OAuth-Token for Arcanum")
+        print("Take it please from https://a.yandex-team.ru/oauth/token (field access_token)")
+        print("and paste. (If link does not work please check docs https://docs.yandex-team.ru/arcanum/communication/public-api)")
+
+        token = input("Token: ")
+        dotenv.set_key(".env", "ARCANUM_TOKEN", token, quote_mode='always', export=False, encoding='utf-8')
+        print("")
+
+
+    return token
 
 
 async def getCommit(revision: int, token: str):

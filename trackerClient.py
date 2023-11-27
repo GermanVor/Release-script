@@ -2,6 +2,8 @@ import requests
 import datetime
 import datasphereClient
 import asyncio
+import dotenv
+import os
 
 CHECK_LIST_ITEMS = [
     {
@@ -48,10 +50,20 @@ CHECK_LIST_ITEMS = [
 
 
 def getToken():
-    print("I need your OAuth-Token for Tracker")
-    print("Take it please from https://oauth.yandex-team.ru/authorize?response_type=token&client_id=5f671d781aca402ab7460fde4050267b")
-    print("and paste. (If link does not work please check docs https://docs.yandex-team.ru/cloud/tracker/concepts/access)")
-    return input('Token: ')
+    dotenv.load_dotenv()
+
+    token = os.environ.get("TRACKER_TOKEN")
+
+    if token == None:
+        print("I need your OAuth-Token for Tracker")
+        print("Take it please from https://oauth.yandex-team.ru/authorize?response_type=token&client_id=5f671d781aca402ab7460fde4050267b")
+        print("and paste. (If link does not work please check docs https://docs.yandex-team.ru/cloud/tracker/concepts/access)")
+
+        token = input("Token: ")
+        dotenv.set_key(".env", "TRACKER_TOKEN", token, quote_mode='always', export=False, encoding='utf-8')
+        print("")
+
+    return token
 
 
 async def getPrevReleaseTicketIssueId(token: str):
