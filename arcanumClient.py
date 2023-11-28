@@ -78,12 +78,16 @@ async def getSvnRevision(revision: int, token: str):
     return int(respBody["data"][0]["svnRevision"])
 
 
-async def getIssueList(endSvnRevision: int, token: str):
+async def getIssueList(
+    endSvnRevision: int,
+    startRevision: str,
+    token: str
+):
     letI = 0
 
     issueIdSet: OrderedSet[str] = OrderedSet([])
 
-    nextFrom = "trunk"
+    nextFrom = startRevision
     whileFlag = True
 
     while whileFlag:
@@ -147,7 +151,8 @@ async def main(version = datasphereClient.Version.Prod):
     )
     issueList = await getIssueList(
         endSvnRevision = svnPreprodRevision,
-        token = token
+        startRevision = "trunk",
+        token = token,
     )
 
     print(f"Diff between {version} and trunk")
