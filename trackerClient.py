@@ -105,26 +105,53 @@ async def getLastReleaseTicket(token: str):
     )
 
 
-async def createReleaseTicket(
-        token: str,
-        prevReleaseIssueId: str,
-        preprodVersion: datasphereClient.VersionSpec,
-        prodVersion: datasphereClient.VersionSpec,
-        issueList: list[str],
-):
-    now = datetime.datetime.now()
-    dateStr = f"{now.day}.{now.month}.{now.year}"
+@dataclass
+class ReleaseInfo:
+    releaseIssueId: str
+    preprodVersion: datasphereClient.VersionSpec
+    prodVersion: datasphereClient.VersionSpec
 
-    summary = f"Релиз datasphere-ui {dateStr}"
 
-    description  = f"previous release: {prevReleaseIssueId}\n"
-    description += f"previous preprod: {preprodVersion.appVersion}\n"
-    description += f"previous prod: {prodVersion.appVersion}\n"
-    description += "\n---\n"
-    description += "Release Tasks:\n"
+@dataclass
+class IssueListInfo:
+    startSign: str
+    issueList: list[str]
+    endSign: str
 
-    for issueId in issueList:
+    def __init__(self, startRevision: str, issueList: list[str], endRevision: str):
+        time = ''
+        if startRevision == "trunk":
+            time = f" ~{datetime.datetime.now().strftime('%d.%m.%y %H:%M')}"
+
+        self.startSign = f"`{startRevision}{time}`"
+        self.issueList = issueList
+        self.endSign = f"`{endRevision}`"
+
+
+def getIssueListDescription(issueListInfo: IssueListInfo):
+    description = "Release Tasks:\n\n"
+
+    description += f"{issueListInfo.startSign}\n\n"
+    for issueId in issueListInfo.issueList:
         description += f"{issueId}\n"
+    description += f"\n{issueListInfo.endSign}"
+
+    return description
+
+
+async def createReleaseTicket(
+    token: str,
+    prevReleaseInfo: ReleaseInfo,
+    issueListInfo: IssueListInfo,
+):
+    summary = f"Релиз datasphere-ui {datetime.datetime.now().strftime('%d.%m.%y')}"
+
+    description  = f"previous release: {prevReleaseInfo.releaseIssueId}\n"
+
+    description += f"previous preprod: {prevReleaseInfo.preprodVersion.appVersion}\n"
+    description += f"previous prod: {prevReleaseInfo.prodVersion.appVersion}\n"
+
+    description += getIssueListDescription(issueListInfo)
 
     r = requests.post(
         url = "https://st-api.yandex-team.ru/v2/issues/",
@@ -163,6 +190,8 @@ async def createReleaseTicket(
 async def main():
     token = getToken()
     lastReleaseTicket = await getLastReleaseTicket(token)
+
+    print(f"previous release: {lastReleaseTicket.id}\n")
     print(f"Previous Release - https://st.yandex-team.ru/{lastReleaseTicket.id}, status - {lastReleaseTicket.status}")
 
 

@@ -6,6 +6,7 @@ from datetime import date as dateType
 from datetime import datetime
 from dataclasses import dataclass
 
+
 warnings.filterwarnings('ignore')
 
 class Version(Enum):
@@ -23,7 +24,7 @@ VERSION_TO_URL = {
 class VersionSpec:
     appVersion: str
     date: dateType
-    revision: int
+    revision: str
 
     # appVersion == '2023-11-22_r12948653'
     def __init__(self, appVersion: str):
@@ -32,7 +33,7 @@ class VersionSpec:
         buff = appVersion.split("_")
 
         self.date = datetime.strptime(buff[0], "%Y-%m-%d").date()
-        self.revision = int(buff[1][1:])
+        self.revision = buff[1]
 
 async def getVersionSpec(version: Version):
     r = requests.get(
@@ -49,14 +50,16 @@ async def getVersionSpec(version: Version):
 
     return VersionSpec(appVersion = rBody["appVersion"])
 
+
 async def main():
-    output = await asyncio.gather(
+    [prevPreprod, prevProd] = await asyncio.gather(
+        getVersionSpec(Version.Preprod),
         getVersionSpec(Version.Prod),
-        getVersionSpec(Version.Preprod)
     )
 
-    print(f"previous prod: `{output[0].appVersion if output[0] else 'NOT FOUNDED'}`")
-    print(f"previous preprod: `{output[1].appVersion if output[1] else 'NOT FOUNDED'}`")
+    print(f"previous preprod: `{prevPreprod.appVersion if prevPreprod else 'NOT FOUNDED'}`")
+    print(f"previous prod: `{prevProd.appVersion if prevProd else 'NOT FOUNDED'}`")
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

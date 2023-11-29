@@ -4,6 +4,8 @@ import asyncio
 import datasphereClient
 import os
 import dotenv
+import datetime
+import trackerClient
 
 def getToken():
     dotenv.load_dotenv()
@@ -56,7 +58,7 @@ def getCloudfrontIssueList(commit):
     return issueList
 
 
-async def getSvnRevision(revision: int, token: str):
+async def getSvnRevision(token: str, revision: str):
     r = requests.get(
         url = "https://arcanum.yandex.net/api/v1/repos/arc_vcs/tree/history/data-ui/cloud-datasphere/",
         verify = False,
@@ -65,7 +67,7 @@ async def getSvnRevision(revision: int, token: str):
             "Authorization": f"OAuth {token}",
         },
         params = {
-            "from": f'r{revision}',
+            "from": revision,
             "limit": 1
         }
     )
@@ -79,9 +81,9 @@ async def getSvnRevision(revision: int, token: str):
 
 
 async def getIssueList(
-    endSvnRevision: int,
+    token: str,
     startRevision: str,
-    token: str
+    endSvnRevision: int,
 ):
     letI = 0
 
@@ -145,20 +147,27 @@ async def main(version = datasphereClient.Version.Prod):
 
     token = getToken()
 
+    startRevision = "trunk"
+    endRevision = preprodVersion.revision
+
     svnPreprodRevision = await getSvnRevision(
-        revision = preprodVersion.revision,
         token = token,
+        revision = endRevision,
     )
 
     issueList = await getIssueList(
-        endSvnRevision = svnPreprodRevision,
-        startRevision = "trunk",
         token = token,
+        startRevision = startRevision,
+        endSvnRevision = svnPreprodRevision,
     )
 
-    print(f"Diff between {version} and trunk")
-    for ticketId in issueList:
-        print(ticketId)
+    issueListInfo = trackerClient.IssueListInfo(
+        startRevision = startRevision,
+        issueList = issueList,
+        endRevision = endRevision
+    )
+
+    print(trackerClient.getIssueListDescription(issueListInfo))
 
 
 if __name__ == "__main__":
