@@ -33,10 +33,14 @@ async def main():
     )
 
     trackerToken = trackerClient.getToken()
-    prevReleaseIssueId = await trackerClient.getPrevReleaseTicketIssueId(trackerToken)
+    lastReleaseTicket = await trackerClient.getLastReleaseTicket(trackerToken)
 
-    if prevReleaseIssueId == None:
-        prevReleaseIssueId = "<Сouldn't find Previously Release Ticket>"
+    if lastReleaseTicket and lastReleaseTicket.status != "closed":
+        print(f"Previous Release Ticket https://st.yandex-team.ru/{lastReleaseTicket.id} is not closed")
+        print("Before create new one please close previous")
+        return
+
+    prevReleaseIssueId = lastReleaseTicket.id if lastReleaseTicket else "<Сouldn't find Previous Release Ticket>"
 
     releaseTicketId = await trackerClient.createReleaseTicket(
         token = trackerToken,

@@ -149,6 +149,7 @@ async def main(version = datasphereClient.Version.Prod):
         revision = preprodVersion.revision,
         token = token,
     )
+
     issueList = await getIssueList(
         endSvnRevision = svnPreprodRevision,
         startRevision = "trunk",

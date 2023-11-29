@@ -4,6 +4,7 @@ import datasphereClient
 import asyncio
 import dotenv
 import os
+from dataclasses import dataclass
 
 CHECK_LIST_ITEMS = [
     {
@@ -66,7 +67,12 @@ def getToken():
     return token
 
 
-async def getPrevReleaseTicketIssueId(token: str):
+@dataclass
+class Ticket:
+    id: str
+    status: str # "closed" | "open"
+
+async def getLastReleaseTicket(token: str):
     r = requests.post(
         url = "https://st-api.yandex-team.ru/v2/issues/_search?expand=transitions",
         headers = {
@@ -78,7 +84,7 @@ async def getPrevReleaseTicketIssueId(token: str):
                 "queue": "CLOUDFRONT",
                 "components": ["112480"],
                 "boards": [{"id": "25958"}],
-                "finished": "true()",
+                # "finished": "true()",
                 "summary": "Релиз datasphere-u",
             },
             "order": "-updated",
@@ -87,10 +93,16 @@ async def getPrevReleaseTicketIssueId(token: str):
     )
 
     rJson = r.json()
-    if rJson and rJson[0]:
-        return rJson[0]["key"]
+    if (r.status_code != 200) or (not rJson) or (not rJson[0]):
+        print(f"getLastReleaseTicket something wrond: {r.text}")
+        return
 
-    return None
+    ticket = rJson[0]
+
+    return Ticket(
+        id = ticket["key"],
+        status = ticket["status"]["key"]
+    )
 
 
 async def createReleaseTicket(
@@ -105,9 +117,9 @@ async def createReleaseTicket(
 
     summary = f"Релиз datasphere-ui {dateStr}"
 
-    description = f"previous release: {prevReleaseIssueId}\n"
-    description += f"preprod: {preprodVersion.appVersion}\n"
-    description += f"prod: {prodVersion.appVersion}\n"
+    description  = f"previous release: {prevReleaseIssueId}\n"
+    description += f"previous preprod: {preprodVersion.appVersion}\n"
+    description += f"previous prod: {prodVersion.appVersion}\n"
     description += "\n---\n"
     description += "Release Tasks:\n"
 
@@ -150,8 +162,8 @@ async def createReleaseTicket(
 
 async def main():
     token = getToken()
-    issueId = await getPrevReleaseTicketIssueId(token)
-    print(f"Previous Release - https://st.yandex-team.ru/{issueId}")
+    lastReleaseTicket = await getLastReleaseTicket(token)
+    print(f"Previous Release - https://st.yandex-team.ru/{lastReleaseTicket.id}, status - {lastReleaseTicket.status}")
 
 
 if __name__ == "__main__":
