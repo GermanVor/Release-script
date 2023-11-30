@@ -148,8 +148,8 @@ async def createReleaseTicket(
 
     description  = f"previous release: {prevReleaseInfo.releaseIssueId}\n"
 
-    description += f"previous preprod: {prevReleaseInfo.preprodVersion.appVersion}\n"
-    description += f"previous prod: {prevReleaseInfo.prodVersion.appVersion}\n"
+    description += f"previous preprod: `{prevReleaseInfo.preprodVersion.appVersion}`\n"
+    description += f"previous prod: `{prevReleaseInfo.prodVersion.appVersion}`\n\n"
 
     description += getIssueListDescription(issueListInfo)
 

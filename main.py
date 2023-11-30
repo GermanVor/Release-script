@@ -55,7 +55,7 @@ async def main():
 
     releaseTicketId = await trackerClient.createReleaseTicket(
         token = trackerToken,
-        prevReleaseInfo = trackerClient.PrevReleaseInfo(
+        prevReleaseInfo = trackerClient.ReleaseInfo(
             releaseIssueId = prevReleaseIssueId,
             preprodVersion = preprodVersion,
             prodVersion = prodVersion,
