@@ -57,8 +57,16 @@ async def main():
         getVersionSpec(Version.Prod),
     )
 
-    print(f"previous preprod: `{prevPreprod.appVersion if prevPreprod else 'NOT FOUNDED'}`")
-    print(f"previous prod: `{prevProd.appVersion if prevProd else 'NOT FOUNDED'}`")
+    preprodAppVersion = prevPreprod.appVersion if prevPreprod else 'NOT FOUNDED'
+    prodAppVersion = prevProd.appVersion if prevProd else 'NOT FOUNDED'
+
+    print(f"preprod: `{preprodAppVersion}`")
+    print(f"prod: `{prodAppVersion}`")
+
+    print()
+
+    print(f"previous preprod: `{preprodAppVersion}`")
+    print(f"previous prod: `{prodAppVersion}`")
 
 
 if __name__ == "__main__":

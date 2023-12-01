@@ -187,6 +187,29 @@ async def createReleaseTicket(
     return str(r.json()["key"])
 
 
+async def addTeamCityComment(token: str, issueId: str):
+    text = "TeamCity Layout:\n"
+
+    text += "```"
+    text += "[ARC] Build Application Docker - \n\n"
+    text += "[ARC] Build VM Image - \n\n"
+    text += "[ARC] Move by hopper - \n\n"
+    text += "[ARC] Deploy to Preprod - \n\n"
+    text += "[ARC] Deploy to Prod - \n\n"
+    text += "```"
+
+    return requests.post(
+        url = f"https://st-api.yandex-team.ru//v2/issues/{issueId}/comments",
+        headers = {
+            "Authorization": f"OAuth {token}",
+            "Accept": "application/json",
+        },
+        json = {
+            "text": text
+        },
+    )
+
+
 async def main():
     token = getToken()
     lastReleaseTicket = await getLastReleaseTicket(token)

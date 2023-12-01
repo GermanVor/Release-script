@@ -147,8 +147,8 @@ async def main(version = datasphereClient.Version.Prod):
 
     token = getToken()
 
-    startRevision = "trunk"
-    endRevision = preprodVersion.revision
+    startRevision = "trunk" #
+    endRevision = "r12984462" #
 
     svnPreprodRevision = await getSvnRevision(
         token = token,

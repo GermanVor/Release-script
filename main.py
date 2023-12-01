@@ -30,8 +30,8 @@ async def main():
         print("Prod revision not founded")
         return
 
-    startRevision = "trunk"
-    endRevision = prodVersion.revision
+    startRevision = "trunk" #
+    endRevision = prodVersion.revision #
 
     arcanumToken = arcanumClient.getToken()
 
@@ -66,6 +66,11 @@ async def main():
     if releaseTicketId == None:
         print("Something wrong. Ticket was not created")
         return
+
+    await trackerClient.addTeamCityComment(
+        token = trackerToken,
+        issueId = releaseTicketId,
+    )
 
     print(f"Ticket has been successfully created: https://st.yandex-team.ru/{releaseTicketId}")
 
