@@ -30,10 +30,17 @@ async def main():
         print("Prod revision not founded")
         return
 
-    startRevision = "trunk" #
+    startRevision = "trunk" # trunk
     endRevision = prodVersion.revision #
 
     arcanumToken = arcanumClient.getToken()
+
+    if startRevision == "trunk":
+        svnTrunkRevision = await arcanumClient.getSvnRevision(
+            token = arcanumToken,
+            revision = startRevision,
+        )
+        startRevision = f"r{svnTrunkRevision}"
 
     endSvnPreprodRevision = await arcanumClient.getSvnRevision(
         token = arcanumToken,

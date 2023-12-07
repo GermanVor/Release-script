@@ -119,11 +119,7 @@ class IssueListInfo:
     endSign: str
 
     def __init__(self, startRevision: str, issueList: list[str], endRevision: str):
-        time = ''
-        if startRevision == "trunk":
-            time = f" ~{datetime.datetime.now().strftime('%d.%m.%y %H:%M')}"
-
-        self.startSign = f"`{startRevision}{time}`"
+        self.startSign = f"`{startRevision}`"
         self.issueList = issueList
         self.endSign = f"`{endRevision}`"
 
