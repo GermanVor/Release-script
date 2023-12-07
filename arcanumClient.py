@@ -7,6 +7,9 @@ import dotenv
 import datetime
 import trackerClient
 
+
+# A* {'message': 'some str\n\nREVIEW: 4985974', 'author': 'zzman', 'path': 'data-ui/cloud-datasphere', 'revision': 'e1229509ee24311db8c245106b0b11d82155cd37', 'svnRevision': 12899475, 'date': 1700043192000}
+
 def getToken():
     dotenv.load_dotenv()
 
@@ -57,7 +60,6 @@ def getCloudfrontIssueList(commit):
 
     return issueList
 
-
 async def getSvnRevision(token: str, revision: str):
     r = requests.get(
         url = "https://arcanum.yandex.net/api/v1/repos/arc_vcs/tree/history/data-ui/cloud-datasphere/",
@@ -73,13 +75,33 @@ async def getSvnRevision(token: str, revision: str):
     )
 
     # r.json() == {'data': {
-    #   'data': [{'message': 'some str', 'author': 'zzman', 'path': 'data-ui/cloud-datasphere', 'revision': 'e1229509ee24311db8c245106b0b11d82155cd37', 'svnRevision': 12899475, 'date': 1700043192000}],
+    #   'data': [A*],
     #   'next': {'path': 'data-ui/cloud-datasphere', 'from': '1ded0e365cca3b3f6f3839dcedf90e01b5123dfb'}
     # }},
     respBody = r.json()["data"]
     return int(respBody["data"][0]["svnRevision"])
 
+# TODO create some class for A*
 
+REVIEW_SRT = "REVIEW: "
+REVIEW_SRT_LEN = len(REVIEW_SRT)
+# repoInfo == A*
+def getPRId(repoInfo):
+    message = str(repoInfo["message"])
+    idx = str.rfind(message, REVIEW_SRT)
+
+    return message[idx + REVIEW_SRT_LEN:]
+
+
+# repoInfo == A*
+def getPRName(repoInfo):
+    message = str(repoInfo["message"])
+    idx = str.find(message, '\n\n')
+
+    return message[0:idx]
+
+
+# TODO return some class instead str list
 async def getIssueList(
     token: str,
     startRevision: str,
@@ -133,7 +155,11 @@ async def getIssueList(
         for commit in commitList:
             if commit is not None:
                 issueList = getCloudfrontIssueList(commit)
-                issueIdSet |= OrderedSet(issueList)
+
+                if len(issueList) == 0:
+                    issueIdSet.add(f"[{getPRName(value)}](https://a.yandex-team.ru/review/{getPRId(value)}) (no linked CLOUDFRONT Ticket)")
+                else:
+                    issueIdSet |= OrderedSet(issueList)
 
     return list(issueIdSet)
 
@@ -148,7 +174,7 @@ async def main(version = datasphereClient.Version.Prod):
     token = getToken()
 
     startRevision = "trunk" #
-    endRevision = "r12984462" #
+    endRevision = "r13016121" #
 
     svnPreprodRevision = await getSvnRevision(
         token = token,
