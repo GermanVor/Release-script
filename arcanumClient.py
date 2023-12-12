@@ -164,17 +164,17 @@ async def getIssueList(
     return list(issueIdSet)
 
 
-async def main(version = datasphereClient.Version.Prod):
-    prodVersion = await datasphereClient.getVersionSpec(version)
+async def main(version = datasphereClient.Version.Preprod):
+    versionSpec = await datasphereClient.getVersionSpec(version)
 
-    if prodVersion == None:
+    if versionSpec == None:
         print(f"Datasphere {version} Version not founded")
         return
 
     token = getToken()
 
     startRevision = "trunk" # trunk
-    endRevision = prodVersion.revision #
+    endRevision = versionSpec.revision # versionSpec.revision
 
     if startRevision == "trunk":
         svnTrunkRevision = await getSvnRevision(
