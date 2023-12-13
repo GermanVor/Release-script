@@ -145,7 +145,9 @@ async def createReleaseTicket(
     description  = f"previous release: {prevReleaseInfo.releaseIssueId}\n"
 
     description += f"previous preprod: `{prevReleaseInfo.preprodVersion.appVersion}`\n"
-    description += f"previous prod: `{prevReleaseInfo.prodVersion.appVersion}`\n\n"
+    description += f"previous prod: `{prevReleaseInfo.prodVersion.appVersion}`\n"
+
+    description += "\n---\n"
 
     description += getIssueListDescription(issueListInfo)
 
@@ -186,12 +188,12 @@ async def createReleaseTicket(
 async def addTeamCityComment(token: str, issueId: str):
     text = "TeamCity Layout:\n"
 
-    text += "```"
-    text += "[ARC] Build Application Docker - \n\n"
-    text += "[ARC] Build VM Image - \n\n"
-    text += "[ARC] Move by hopper - \n\n"
-    text += "[ARC] Deploy to Preprod - \n\n"
-    text += "[ARC] Deploy to Prod - \n\n"
+    text += "```\n"
+    text += "Build Application Docker - \n\n"
+    text += "Build VM Image - \n\n"
+    text += "Move by hopper - \n\n"
+    text += "Deploy to Preprod - https://teamcity.aw.cloud.yandex.net/buildConfiguration/Console_Datasphere_ArcDeployToPreprod#all-projects\n\n\n"
+    text += "Deploy to Prod - https://teamcity.aw.cloud.yandex.net/buildConfiguration/Console_Datasphere_ArcDeployToProd#all-projects\n\n"
     text += "```"
 
     return requests.post(
