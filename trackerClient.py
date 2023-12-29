@@ -71,6 +71,7 @@ def getToken():
 class Ticket:
     id: str
     status: str # "closed" | "open"
+    description: str
 
 async def getLastReleaseTicket(token: str):
     r = requests.post(
@@ -85,9 +86,9 @@ async def getLastReleaseTicket(token: str):
                 "components": ["112480"],
                 "boards": [{"id": "25958"}],
                 # "finished": "true()",
-                "summary": "Релиз datasphere-u",
+                "summary": "Релиз datasphere-ui",
             },
-            "order": "-updated",
+            "order": "-created",
             # "perPage": 1 per Page does not work
         },
     )
@@ -101,8 +102,28 @@ async def getLastReleaseTicket(token: str):
 
     return Ticket(
         id = ticket["key"],
-        status = ticket["status"]["key"]
+        status = ticket["status"]["key"],
+        description = ticket["description"]
     )
+
+
+async def updateReleaseTicket(token: str, issueId: str, description: str):
+    r = requests.patch(
+        url = f"https://st-api.yandex-team.ru/v2/issues/{issueId}",
+        headers = {
+            "Authorization": f"OAuth {token}",
+            "Accept": "application/json",
+        },
+        json = {
+            "description": description
+        },
+    )
+
+    if r.status_code != 200:
+        print(f"updateReleaseTicket something wrond: {r.text}")
+        return False
+
+    return True
 
 
 @dataclass
