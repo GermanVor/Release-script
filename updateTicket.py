@@ -63,6 +63,12 @@ async def main():
     isOk = await trackerClient.updateReleaseTicket(trackerToken, lastReleaseTicket.id, newDescription)
 
     if isOk:
+        comment = ""
+        comment += f"preprod: `{preprod.appVersion}`\n"
+        comment += f"prod: `{prod.appVersion}`"
+
+        await trackerClient.addComment(trackerToken, lastReleaseTicket.id, comment)
+
         print(f"Ticket has been successfully updated: https://st.yandex-team.ru/{lastReleaseTicket.id}")
     else :
         print(f"Ticket was NOT updated: https://st.yandex-team.ru/{lastReleaseTicket.id}")

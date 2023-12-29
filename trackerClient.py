@@ -125,6 +125,18 @@ async def updateReleaseTicket(token: str, issueId: str, description: str):
 
     return True
 
+async def addComment(token: str, issueId: str, comment: str):
+    return requests.post(
+        url = f"https://st-api.yandex-team.ru/v2/issues/{issueId}/comments",
+        headers = {
+            "Authorization": f"OAuth {token}",
+            "Accept": "application/json",
+        },
+        json = {
+            "text": comment
+        },
+    )
+
 
 @dataclass
 class ReleaseInfo:
