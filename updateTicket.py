@@ -3,6 +3,20 @@ import datasphereClient
 import asyncio
 import arcanumClient
 
+STR = "previous prod: `"
+def getProdVersionSpecFromTicketDescription(releaseTicketDescription: str):
+    idx = releaseTicketDescription.find(STR)
+    if idx == -1:
+        return None
+
+    idx += len(STR)
+    endIdx = releaseTicketDescription.find("`", idx)
+
+    appVersion = releaseTicketDescription[idx:endIdx]
+
+    return datasphereClient.VersionSpec(appVersion)
+
+
 async def main():
     arcanumToken = arcanumClient.getToken()
     trackerToken = trackerClient.getToken()
@@ -16,17 +30,19 @@ async def main():
         if ans != "y":
             return
 
+    prevReleaseVersionSpec = getProdVersionSpecFromTicketDescription(lastReleaseTicket.description)
+
+    if prevReleaseVersionSpec == None:
+        print("It is not possible to restore the previous release revision")
+        return
+
     [preprod, prod] = await asyncio.gather(
         datasphereClient.getVersionSpec(datasphereClient.Version.Preprod),
         datasphereClient.getVersionSpec(datasphereClient.Version.Prod),
     )
 
-    if preprod.appVersion == prod.appVersion:
-        print(f"Preprod and Prod revisions are the same {prod.appVersion}. Nothing to update")
-        return
-
     startRevision = preprod.revision #
-    endRevision = prod.revision #
+    endRevision = prevReleaseVersionSpec.revision #
 
     svnProdRevision = await arcanumClient.getSvnRevision(
         token = arcanumToken,
