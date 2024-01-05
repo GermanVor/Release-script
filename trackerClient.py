@@ -157,8 +157,9 @@ class IssueListInfo:
         self.endSign = f"`{endRevision}`"
 
 
+ISSUE_LIST_PREFIX = "Release Tasks:"
 def getIssueListDescription(issueListInfo: IssueListInfo):
-    description = "Release Tasks:\n\n"
+    description = f"{ISSUE_LIST_PREFIX}\n\n"
 
     description += f"{issueListInfo.startSign}\n\n"
     for issueId in issueListInfo.issueList:
@@ -167,6 +168,9 @@ def getIssueListDescription(issueListInfo: IssueListInfo):
 
     return description
 
+
+PREVIOUS_PROD_PREFIX = "previous prod: `"
+PREVIOUS_PROD_ENDING = "`"
 
 async def createReleaseTicket(
     token: str,
@@ -178,7 +182,7 @@ async def createReleaseTicket(
     description  = f"previous release: {prevReleaseInfo.releaseIssueId}\n"
 
     description += f"previous preprod: `{prevReleaseInfo.preprodVersion.appVersion}`\n"
-    description += f"previous prod: `{prevReleaseInfo.prodVersion.appVersion}`\n"
+    description += f"{PREVIOUS_PROD_PREFIX}{prevReleaseInfo.prodVersion.appVersion}{PREVIOUS_PROD_ENDING}\n"
 
     description += "\n---\n"
 

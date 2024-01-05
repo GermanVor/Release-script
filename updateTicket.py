@@ -3,14 +3,14 @@ import datasphereClient
 import asyncio
 import arcanumClient
 
-STR = "previous prod: `"
+
 def getProdVersionSpecFromTicketDescription(releaseTicketDescription: str):
-    idx = releaseTicketDescription.find(STR)
+    idx = releaseTicketDescription.find(trackerClient.PREVIOUS_PROD_PREFIX)
     if idx == -1:
         return None
 
-    idx += len(STR)
-    endIdx = releaseTicketDescription.find("`", idx)
+    idx += len(trackerClient.PREVIOUS_PROD_PREFIX)
+    endIdx = releaseTicketDescription.find(trackerClient.PREVIOUS_PROD_ENDING, idx)
 
     appVersion = releaseTicketDescription[idx:endIdx]
 
@@ -63,10 +63,10 @@ async def main():
 
     newIssueListDescription = trackerClient.getIssueListDescription(issueListInfo)
 
-    idx = lastReleaseTicket.description.find("Release Tasks:")
+    idx = lastReleaseTicket.description.find(trackerClient.ISSUE_LIST_PREFIX)
 
     if idx == -1:
-        print("""Something wrong with description of Release. There is no substring - "Release Tasks:".""")
+        print(f"""Something wrong with description of Release. There is no substring - "{trackerClient.ISSUE_LIST_PREFIX}".""")
         return
 
     prevIssueListDescription = lastReleaseTicket.description[idx:]
