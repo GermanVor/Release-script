@@ -27,29 +27,6 @@ def getToken():
 
     return token
 
-
-async def getCommit(revision: int, token: str):
-    r = requests.get(
-        url = f"https://arcanum.yandex.net/api/v1/repos/arc_vcs/commits/r{revision}",
-        verify = False,
-        headers = {
-            "Accept": "application/json",
-            "Authorization": f"OAuth {token}",
-        },
-        params = {
-            "fields": "issues,id",
-            "diff_mode": 'tree_aware_content',
-        },
-    )
-
-    if r.status_code != 200:
-        print(f"getCommit for {revision} something wrond: {r.text}")
-        return None
-
-    # r.json() == {'data': {'issues': ['CLOUDFRONT-12345'], 'id': 'c06bf0c9976c883a1203ad1eb38f118c48337d10'}}
-    return r.json()["data"]
-
-
 # commit from getCommit
 def getCloudfrontIssueList(commit):
     issueList = []
@@ -107,16 +84,12 @@ async def getIssueList(
     startRevision: str,
     endSvnRevision: int,
 ):
-    letI = 0
-
     issueIdSet: OrderedSet[str] = OrderedSet([])
 
     nextFrom = startRevision
     whileFlag = True
 
     while whileFlag:
-        letI += 1
-
         r = requests.get(
             url = "https://arcanum.yandex.net/api/v1/repos/arc_vcs/tree/history/data-ui/cloud-datasphere/",
             verify = False,
@@ -136,30 +109,25 @@ async def getIssueList(
 
         respBody = r.json()["data"]
         nextFrom = respBody["next"]["from"]
+        prList = respBody["data"]
 
-        commitSvnRevisionList = []
+        for pr in prList:
+            svnRevision = pr["svnRevision"]
 
-        for value in respBody["data"]:
-            commitSvnRevision = value["svnRevision"]
-
-            if commitSvnRevision == endSvnRevision:
+            if svnRevision == endSvnRevision:
                 whileFlag = False
                 break
 
-            commitSvnRevisionList.append(commitSvnRevision)
+            issueList = getCloudfrontIssueList(pr)
 
-        commitList = await asyncio.gather(
-            *[getCommit(commitSvnRevision, token) for commitSvnRevision in commitSvnRevisionList]
-        )
+            if len(issueList) == 0:
+                prName = getPRName(pr)
+                prId = getPRId(pr)
 
-        for commit in commitList:
-            if commit is not None:
-                issueList = getCloudfrontIssueList(commit)
+                issueIdSet.add(f"!!! [{prName}](https://a.yandex-team.ru/review/{prId}) (no linked CLOUDFRONT Ticket)")
+            else:
+                issueIdSet |= OrderedSet(issueList)
 
-                if len(issueList) == 0:
-                    issueIdSet.add(f"[{getPRName(value)}](https://a.yandex-team.ru/review/{getPRId(value)}) (no linked CLOUDFRONT Ticket)")
-                else:
-                    issueIdSet |= OrderedSet(issueList)
 
     return list(issueIdSet)
 
