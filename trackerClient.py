@@ -80,6 +80,9 @@ async def getLastReleaseTicket(token: str):
             "Authorization": f"OAuth {token}",
             "Accept": "application/json",
         },
+        params = {
+            "perPage": 1
+        },
         json = {
             "filter": {
                 "queue": "CLOUDFRONT",
@@ -89,7 +92,6 @@ async def getLastReleaseTicket(token: str):
                 "summary": "Релиз datasphere-ui",
             },
             "order": "-created",
-            # "perPage": 1 per Page does not work
         },
     )
 
