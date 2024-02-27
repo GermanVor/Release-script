@@ -209,7 +209,7 @@ async def createReleaseTicket(
             "components": ["datasphere"],
             "boards": [{"id": "25958"}],
             "checklistItems": CHECK_LIST_ITEMS,
-            "unique": summary,
+            # "unique": summary,
         },
     )
 
