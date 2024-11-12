@@ -4,8 +4,14 @@ import trackerClient
 import datasphereClient
 import arcanumClient
 import datetime
+import argparse
 
 warnings.filterwarnings('ignore')
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--topRevision", help="by default is trunk", default = "trunk")
+
+args = parser.parse_args()
 
 async def main():
     trackerToken = trackerClient.getToken()
@@ -30,17 +36,17 @@ async def main():
         print("Prod revision not founded")
         return
 
-    startRevision = "trunk" # trunk
-    endRevision = prodVersion.revision #
+    topRevision = str(args.topRevision) # trunk
+    endRevision = prodVersion.revision # prodVersion.revision
 
     arcanumToken = arcanumClient.getToken()
 
-    if startRevision == "trunk":
+    if topRevision == "trunk":
         svnTrunkRevision = await arcanumClient.getSvnRevision(
             token = arcanumToken,
-            revision = startRevision,
+            revision = topRevision,
         )
-        startRevision = f"r{svnTrunkRevision}"
+        topRevision = f"r{svnTrunkRevision}"
 
     endSvnPreprodRevision = await arcanumClient.getSvnRevision(
         token = arcanumToken,
@@ -49,11 +55,11 @@ async def main():
 
     issueList = await arcanumClient.getIssueList(
         token = arcanumToken,
-        startRevision = startRevision,
+        topRevision = topRevision,
         endSvnRevision = endSvnPreprodRevision,
     )
     issueListInfo = trackerClient.IssueListInfo(
-        startRevision = startRevision,
+        topRevision = topRevision,
         issueList = issueList,
         endRevision = endRevision
     )

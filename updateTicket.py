@@ -41,7 +41,7 @@ async def main():
         datasphereClient.getVersionSpec(datasphereClient.Version.Prod),
     )
 
-    startRevision = preprod.revision #
+    topRevision = preprod.revision #
     endRevision = prevReleaseVersionSpec.revision #
 
     svnProdRevision = await arcanumClient.getSvnRevision(
@@ -51,12 +51,12 @@ async def main():
 
     issueList = await arcanumClient.getIssueList(
         token = arcanumToken,
-        startRevision = startRevision,
+        topRevision = topRevision,
         endSvnRevision = svnProdRevision,
     )
 
     issueListInfo = trackerClient.IssueListInfo(
-        startRevision = startRevision,
+        topRevision = topRevision,
         issueList = issueList,
         endRevision = endRevision
     )

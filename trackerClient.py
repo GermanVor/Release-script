@@ -153,8 +153,8 @@ class IssueListInfo:
     issueList: list[str]
     endSign: str
 
-    def __init__(self, startRevision: str, issueList: list[str], endRevision: str):
-        self.startSign = f"`{startRevision}`"
+    def __init__(self, topRevision: str, issueList: list[str], endRevision: str):
+        self.startSign = f"`{topRevision}`"
         self.issueList = issueList
         self.endSign = f"`{endRevision}`"
 

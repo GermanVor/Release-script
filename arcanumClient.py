@@ -81,12 +81,12 @@ def getPRName(repoInfo):
 # TODO return some class instead str list
 async def getIssueList(
     token: str,
-    startRevision: str,
+    topRevision: str,
     endSvnRevision: int,
 ):
     issueIdSet: OrderedSet[str] = OrderedSet([])
 
-    nextFrom = startRevision
+    nextFrom = topRevision
     whileFlag = True
 
     while whileFlag:
@@ -141,15 +141,15 @@ async def main(version = datasphereClient.Version.Preprod):
 
     token = getToken()
 
-    startRevision = "trunk" # trunk
+    topRevision = "trunk" # trunk
     endRevision = versionSpec.revision # versionSpec.revision
 
-    if startRevision == "trunk":
+    if topRevision == "trunk":
         svnTrunkRevision = await getSvnRevision(
             token = token,
-            revision = startRevision,
+            revision = topRevision,
         )
-        startRevision = f"r{svnTrunkRevision}"
+        topRevision = f"r{svnTrunkRevision}"
 
     svnPreprodRevision = await getSvnRevision(
         token = token,
@@ -158,12 +158,12 @@ async def main(version = datasphereClient.Version.Preprod):
 
     issueList = await getIssueList(
         token = token,
-        startRevision = startRevision,
+        topRevision = topRevision,
         endSvnRevision = svnPreprodRevision,
     )
 
     issueListInfo = trackerClient.IssueListInfo(
-        startRevision = startRevision,
+        topRevision = topRevision,
         issueList = issueList,
         endRevision = endRevision
     )
