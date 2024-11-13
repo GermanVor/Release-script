@@ -5,6 +5,7 @@ import asyncio
 import dotenv
 import os
 from dataclasses import dataclass
+from typing import List
 
 CHECK_LIST_ITEMS = [
     {
@@ -150,10 +151,10 @@ class ReleaseInfo:
 @dataclass
 class IssueListInfo:
     startSign: str
-    issueList: list[str]
+    issueList: List[str]
     endSign: str
 
-    def __init__(self, topRevision: str, issueList: list[str], endRevision: str):
+    def __init__(self, topRevision: str, issueList: List[str], endRevision: str):
         self.startSign = f"`{topRevision}`"
         self.issueList = issueList
         self.endSign = f"`{endRevision}`"
