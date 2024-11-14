@@ -10,11 +10,14 @@ warnings.filterwarnings('ignore')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--topRevision", help="by default is trunk", default = "trunk")
+parser.add_argument("--trackerToken", help="You can pass token with env.TRACKER_TOKEN also")
+parser.add_argument("--arcanumToken", help="You can pass token with env.ARCANUM_TOKEN also")
 
 args = parser.parse_args()
 
 async def main():
-    trackerToken = trackerClient.getToken()
+    trackerToken = str(args.trackerToken) if args.trackerToken else trackerClient.getToken()
+    arcanumToken = str(args.arcanumToken) if args.arcanumToken else arcanumClient.getToken()
 
     lastReleaseTicket = await trackerClient.getLastReleaseTicket(trackerToken)
 
@@ -38,8 +41,6 @@ async def main():
 
     topRevision = str(args.topRevision) # trunk
     endRevision = prodVersion.revision # prodVersion.revision
-
-    arcanumToken = arcanumClient.getToken()
 
     if topRevision == "trunk":
         svnTrunkRevision = await arcanumClient.getSvnRevision(
@@ -80,12 +81,9 @@ async def main():
         print("Something wrong. Ticket was not created")
         return
 
-    await trackerClient.addTeamCityComment(
-        token = trackerToken,
-        issueId = releaseTicketId,
-    )
-
     print(f"Ticket has been successfully created: https://st.yandex-team.ru/{releaseTicketId}")
+
+    return releaseTicketId
 
 
 loop = asyncio.get_event_loop()
